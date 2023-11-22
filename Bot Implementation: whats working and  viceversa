@@ -1,0 +1,4 @@
+Bot Implementation:
+1. Telegram bot working
+2. Issues discovered:
+  - doesn't respond when you put any unknown word. will be sorted as we progress
