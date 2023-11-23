@@ -24,5 +24,14 @@ def send_crypto(message):
                 "\n /top - Get top 10 cryptocurrencies"
                 "\n /price - Get price of a specific cryptocurrency"
                 "\n /history - Get historical data of a specific cryptocurrency")
-    
+
+@bot.message_handler(commands=['blockchain'])
+def send_blockchain(message):
+    markup = telebot.types.InlineKeyboardMarkup(row_width=2)
+    btn1 = telebot.types.InlineKeyboardButton('What is Blockchain?', callback_data='blockchain')
+    btn2 = telebot.types.InlineKeyboardButton('How does it work?', callback_data='how')
+    btn3 = telebot.types.InlineKeyboardButton('What is mining?', callback_data='mining')
+    btn4 = telebot.types.InlineKeyboardButton('What is a smart contract?', callback_data='smart')
+    markup.add(btn1, btn2, btn3, btn4)
+    bot.send_message(message.chat.id,"What do you want to know?:", reply_markup=markup)    
 bot.infinity_polling()
