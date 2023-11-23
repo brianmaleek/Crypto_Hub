@@ -33,5 +33,36 @@ def send_blockchain(message):
     btn3 = telebot.types.InlineKeyboardButton('What is mining?', callback_data='mining')
     btn4 = telebot.types.InlineKeyboardButton('What is a smart contract?', callback_data='smart')
     markup.add(btn1, btn2, btn3, btn4)
-    bot.send_message(message.chat.id,"What do you want to know?:", reply_markup=markup)    
-bot.infinity_polling()
+    bot.send_message(message.chat.id,"What do you want to know?:", reply_markup=markup)
+
+# Handle responses for the buttons
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    if call.data == 'blockchain':
+        bot.send_message(call.message.chat.id, "Blockchain is a system of recording information in a way "
+                         "that makes it difficult or impossible to change, hack, or cheat the system. " 
+                         "A blockchain is essentially a digital ledger of transactions that is duplicated "
+                         "and distributed across the entire network of computer systems on the blockchain.")
+    elif call.data == 'how':
+        bot.send_message(call.message.chat.id, "Blockchain was invented by a person (or group of people) "
+                         "using the name Satoshi Nakamoto in 2008 to serve as the public transaction ledger of the cryptocurrency bitcoin. "
+                         "The invention of the blockchain for bitcoin made it the first digital currency to solve"
+                          " the double-spending problem without the need of a trusted authority or central server. "
+                          "The bitcoin design has inspired other applications.")
+    elif call.data == 'mining':
+        bot.send_message(call.message.chat.id, "Mining is the process of adding transaction records "
+                         "to Bitcoin's public ledger of past transactions (and a 'mining rig' "
+                         "is a colloquial metaphor for a single computer system that performs "
+                         "the necessary computations for 'mining'.")
+    elif call.data == 'smart':
+        bot.send_message(call.message.chat.id, "A smart contract is a computer program or a "
+                         "transaction protocol which is intended to automatically execute, "
+                         "control or document legally relevant events and actions according "
+                         "to the terms of a contract or an agreement.") 
+  
+def main():
+    bot.infinity_polling()
+
+if __name__ == '__main__':
+    main()
