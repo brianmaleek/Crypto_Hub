@@ -41,6 +41,35 @@ def send_crypto(message):
                 "\n /price - Get price of a specific cryptocurrency"
                 "\n /history - Get historical data of a specific cryptocurrency")
 
+    markup = telebot.types.InlineKeyboardMarkup(row_width=2)
+
+    # Create a menu item for /top with an inline keyboard
+    top_button = telebot.types.InlineKeyboardButton('Top 10 Cryptocurrencies', callback_data='top')
+    
+    # Create a menu item for /price with an inline keyboard
+    price_button = telebot.types.InlineKeyboardButton('Price of a Cryptocurrency', callback_data='price')
+    
+    # Create a menu item for /history with an inline keyboard
+    history_button = telebot.types.InlineKeyboardButton('Historical Data of a Cryptocurrency', callback_data='history')
+    
+    # Add the menu items to the main markup
+    markup.add(top_button, price_button, history_button)
+    
+    # Send the message with the menu items
+    bot.reply_to(message, "Choose an option:", reply_markup=markup)
+
+
+""" def get_crypto_price(crypto):
+    try:
+        r = requests.get(f'https://api.coinbase.com/v2/prices/{crypto}-USD/spot')
+        price = r.json()['data']['amount']
+        return price
+    except Exception as e:
+        logging.error(f"Error getting price: {str(e)}")
+        return None """
+
+
+
 @bot.message_handler(commands=['blockchain'])
 def send_blockchain(message):
     markup = telebot.types.InlineKeyboardMarkup(row_width=2)
@@ -75,7 +104,16 @@ def callback_query(call):
             bot.send_message(call.message.chat.id, "A smart contract is a computer program or a "
                             "transaction protocol which is intended to automatically execute, "
                             "control or document legally relevant events and actions according "
-                            "to the terms of a contract or an agreement.") 
+                            "to the terms of a contract or an agreement.")
+        elif call.data == 'top':
+            bot.send_message(call.message.chat.id, "You clicked on /top. Here's information about the top 10 cryptocurrencies.")
+            # Add your logic to fetch and display information about the top 10 cryptocurrencies.
+        elif call.data == 'price':
+            bot.send_message(call.message.chat.id, "You clicked on /price. Here's information about the price of a specific cryptocurrency.")
+            # Add your logic to fetch and display information about cryptocurrency prices.
+        elif call.data == 'history':
+            bot.send_message(call.message.chat.id, "You clicked on /history. Here's information about the historical data of a specific cryptocurrency.")
+            # Add your logic to fetch and display historical data for a cryptocurrency.
     except Exception as e:
         logging.error(f"Error handling callback query: {str(e)}")
 
