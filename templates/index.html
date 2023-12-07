@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Crypto-Hub-Landing</title>
+  </head>
+  <body>
+
+
+    {% extends "layout.html" %}
+    {% block content %}
+    
+    <div class="container">
+        <div class="header-content" id="Intro">
+            <div class="row">
+                <div class="col-md-5">
+                    <h1>A crypto telegram bot.</h1>
+                    <p class="text-dark">Use Crypto-Hub to get all your cryptocurrency information.</p>
+                    <button class="btn btn-outline-dark btn-lg"> 
+                        <img src="{{url_for('static', filename='images/telegram.svg')}}" alt="" class="tele">
+                        <a href="https://t.me/cryptoinfohub_bot" class="bot-link">Try out the bot</a>
+                    </button>
+                    
+                </div>
+                <div class="col-md-7">
+                    <img src="{{url_for('static', filename='images/himage.png')}}" alt="app" class="img-fluid">
+                </div>
+            </div>
+        </div>
+        
+        
+    </div>
+
+    
+    
+    {% endblock %}
+  </body>
+</html>
