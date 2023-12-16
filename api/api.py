@@ -18,3 +18,15 @@ async def get_price(crypto):
         async with session.get(url, headers=headers) as resp:
             data = await resp.json()
             return  data.get(crypto, ).get('usd')
+        
+
+# Get Crypto Price History
+        
+async def get_price_history(crypto, days):
+    async with aiohttp.ClientSession() as session:
+        url = f'{CRYPTO_URL}/coin/{crypto}/market_chart?vs_currency=usd&days={days}'
+        headers = {'Authorization': f'Token {API_KEY}'}
+        async with session.get(url, headers=headers) as resp:
+            data = await resp.json()
+            return data.get('prices')
+
