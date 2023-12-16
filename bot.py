@@ -51,10 +51,14 @@ def send_crypto(message):
     # Send the message with the menu items
     bot.reply_to(message, "Choose an option:", reply_markup=markup)
 
+
+#####################
 # Handle Price Query
+#####################
+
 @bot.message_handler(commands=['price'])
 def send_price(message):
-    code = bot.reply_to(message, """You clicked on /price. Please enter the name of the cryptocurrency you want to know the price of. If it is more than one enter the names seperated by a comma. For example: bitcoin, ethereum, litecoin""")
+    code = bot.reply_to(message, "You clicked on /price. Please enter the name of the cryptocurrency you want to know the price of. If it is more than one enter the names seperated by a comma. For example: bitcoin, ethereum, litecoin")
     
     # Handle the message with the crypto name
     @bot.message_handler(func=lambda message: True)
@@ -65,10 +69,17 @@ def send_price(message):
 # api consumption
 async def process_crypto_price_step(chat_id, crypto_name):
     try:
-        price = await get_price(crypto_name)
-        bot.send_message(chat_id, f"The price of {crypto_name} is {price} USD")
+        data = await get_price(crypto_name)
+        if len(data) == 1:
+            price = data.get(crypto_name).get("usd")
+            bot.send_message(chat_id, f"The price of {crypto_name} is {price} USD")
+        else:
+            for key, value in data.items():
+                price = value.get("usd")
+                bot.send_message(chat_id, f"The price of {key} is {price} USD")
     except Exception as e:
-        bot.reply_to(chat_id, 'Ooops! Something went wrong. Please try again.')
+        print(f"An error occurred: {e}")
+        bot.send_message(chat_id, 'Ooops! Something went wrong. Please try again.')
 
 
 #########################
