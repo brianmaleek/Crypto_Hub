@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from api.api import get_price, get_price_history
 import asyncio
 
+
 # Load the environment variables from the .env file
 load_dotenv()
 
@@ -22,15 +23,23 @@ if not BOT_TOKEN:
 # Create a bot instance
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Command handlers
+
+################################
+# Handle the /start command
+################################
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     bot.reply_to(message, "Welcome to Crypto Hub, where you can get information about "
                  "BlockChain and crypto currencies.\n\nYou can control me by "
-                 "sending the following commands: "
-                 "\n /crypto - Get information about cryptocurrencies "
-                 "\n /blockchain - Get information about blockchain")
+                 "clicking on the following commands: 👇 "
+                 "\n 👉 /crypto - Get information about cryptocurrencies "
+                 "\n 👉 /blockchain - Get information about blockchain")
 
+#####################
+# Handle Crypto Query
+#####################
+    
 @bot.message_handler(commands=['crypto'])
 def send_crypto(message):
     bot.reply_to(message, "Crypto currencies are digital currencies that are "
@@ -38,16 +47,14 @@ def send_crypto(message):
                  "authority, such as a bank or government. Transactions are "
                  "recorded on a distributed public ledger called a blockchain."
                  "\n\n  To find out more use click on any of the following commands:"
-                "\n /top - Get top 10 cryptocurrencies"
-                "\n /price - Get price of a specific cryptocurrency"
-                "\n /history - Get Historical data of a specific cryptocurrency on a specific date")
+                "\n 👆 /top - Get top 10 cryptocurrencies"
+                "\n 💰 /price - Get price of a specific cryptocurrency"
+                "\n 📈 /history - Get Historical data of a specific cryptocurrency on a specific date")
 
     markup = telebot.types.InlineKeyboardMarkup(row_width=2)
 
     # Create a menu item for /top with an inline keyboard
     top_button = telebot.types.InlineKeyboardButton('Top 10 Cryptocurrencies', callback_data='top')
-    
-    
     # Send the message with the menu items
     bot.reply_to(message, "Choose an option:", reply_markup=markup)
 
@@ -69,6 +76,7 @@ def send_price(message):
 # api consumption
 async def process_crypto_price_step(chat_id, crypto_name):
     try:
+        crypto_name = crypto_name.replace(" ", "")
         data = await get_price(crypto_name)
         if len(data) == 1:
             price = data.get(crypto_name).get("usd")
@@ -76,7 +84,9 @@ async def process_crypto_price_step(chat_id, crypto_name):
         else:
             for key, value in data.items():
                 price = value.get("usd")
-                bot.send_message(chat_id, f"The price of {key} is {price} USD")
+                message = f"{key} : {price} USD"
+
+        bot.send_message(chat_id, f"The price of {key} is {price} USD")
     except Exception as e:
         print(f"An error occurred: {e}")
         bot.send_message(chat_id, 'Ooops! Something went wrong. Please try again.')
@@ -163,6 +173,9 @@ def callback_query(call):
             # Add your logic to fetch and display historical data for a cryptocurrency.
     except Exception as e:
         logging.error(f"Error handling callback query: {str(e)}")
+
+
+# Start the bot
 
 def main():
     try:
