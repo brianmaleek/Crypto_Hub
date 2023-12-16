@@ -2,7 +2,8 @@ import os
 import telebot
 import logging
 from dotenv import load_dotenv
-
+from api.api import get_price, get_price_history
+import asyncio
 
 # Load the environment variables from the .env file
 load_dotenv()
@@ -36,39 +37,87 @@ def send_crypto(message):
                  "transferred between peers without the need for a central "
                  "authority, such as a bank or government. Transactions are "
                  "recorded on a distributed public ledger called a blockchain."
-                 "\n\n  To find out more use the following commands:"
+                 "\n\n  To find out more use click on any of the following commands:"
                 "\n /top - Get top 10 cryptocurrencies"
                 "\n /price - Get price of a specific cryptocurrency"
-                "\n /history - Get historical data of a specific cryptocurrency")
+                "\n /history - Get Historical data of a specific cryptocurrency on a specific date")
 
     markup = telebot.types.InlineKeyboardMarkup(row_width=2)
 
     # Create a menu item for /top with an inline keyboard
     top_button = telebot.types.InlineKeyboardButton('Top 10 Cryptocurrencies', callback_data='top')
     
-    # Create a menu item for /price with an inline keyboard
-    price_button = telebot.types.InlineKeyboardButton('Price of a Cryptocurrency', callback_data='price')
-    
-    # Create a menu item for /history with an inline keyboard
-    history_button = telebot.types.InlineKeyboardButton('Historical Data of a Cryptocurrency', callback_data='history')
-    
-    # Add the menu items to the main markup
-    markup.add(top_button, price_button, history_button)
     
     # Send the message with the menu items
     bot.reply_to(message, "Choose an option:", reply_markup=markup)
 
 
-""" def get_crypto_price(crypto):
+#####################
+# Handle Price Query
+#####################
+
+@bot.message_handler(commands=['price'])
+def send_price(message):
+    code = bot.reply_to(message, "You clicked on /price. Please enter the name of the cryptocurrency you want to know the price of. If it is more than one enter the names seperated by a comma. For example: bitcoin, ethereum, litecoin")
+    
+    # Handle the message with the crypto name
+    @bot.message_handler(func=lambda message: True)
+    def handle_crypto_name(message):
+        crypto_name = message.text
+        asyncio.run(process_crypto_price_step(message.chat.id, crypto_name))
+
+# api consumption
+async def process_crypto_price_step(chat_id, crypto_name):
     try:
-        r = requests.get(f'https://api.coinbase.com/v2/prices/{crypto}-USD/spot')
-        price = r.json()['data']['amount']
-        return price
+        data = await get_price(crypto_name)
+        if len(data) == 1:
+            price = data.get(crypto_name).get("usd")
+            bot.send_message(chat_id, f"The price of {crypto_name} is {price} USD")
+        else:
+            for key, value in data.items():
+                price = value.get("usd")
+                bot.send_message(chat_id, f"The price of {key} is {price} USD")
     except Exception as e:
-        logging.error(f"Error getting price: {str(e)}")
-        return None """
+        print(f"An error occurred: {e}")
+        bot.send_message(chat_id, 'Ooops! Something went wrong. Please try again.')
 
 
+#########################
+# Handle History Query
+#########################
+
+@bot.message_handler(commands=['history'])
+def send_history(message):
+    bot.reply_to(message, "You clicked on /history. Please enter the name of the cryptocurrency you want to know the historical data of.")
+    bot.register_next_step_handler(message, handle_crypto_name)
+
+# Handle the message with the crypto name and get date
+def handle_crypto_name(message):
+    crypto_name = message.text
+    bot.send_message(message.chat.id, f"You entered {crypto_name}. Please enter the date in the format DD-MM-YYYY.")
+    bot.register_next_step_handler(message, lambda msg: handle_date(msg, crypto_name))
+
+# Handle the message with the date
+def handle_date(message, crypto_name):
+    date = message.text
+    asyncio.run(process_crypto_history_step2(message.chat.id, crypto_name, date))
+
+
+async def process_crypto_history_step2(chat_id, crypto_name, date):
+    try:
+        data = await get_price_history(crypto_name, date)
+        current_price = data.get("market_data").get("current_price").get("usd")
+        market_cap = data.get("market_data").get("market_cap").get("usd")
+        total_volume = data.get("market_data").get("total_volume").get("usd")
+        bot.send_message(chat_id, f"The price of {crypto_name} on {date} was current price : {current_price} USD, market cap : {market_cap} USD, total volume : {total_volume} USD")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        bot.send_message(chat_id,'Ooops! Something went wrong. Please try again.')
+
+
+##########################
+# Handle Blockchain Query
+##########################
 
 @bot.message_handler(commands=['blockchain'])
 def send_blockchain(message):
@@ -108,9 +157,7 @@ def callback_query(call):
         elif call.data == 'top':
             bot.send_message(call.message.chat.id, "You clicked on /top. Here's information about the top 10 cryptocurrencies.")
             # Add your logic to fetch and display information about the top 10 cryptocurrencies.
-        elif call.data == 'price':
-            bot.send_message(call.message.chat.id, "You clicked on /price. Here's information about the price of a specific cryptocurrency.")
-            # Add your logic to fetch and display information about cryptocurrency prices.
+       
         elif call.data == 'history':
             bot.send_message(call.message.chat.id, "You clicked on /history. Here's information about the historical data of a specific cryptocurrency.")
             # Add your logic to fetch and display historical data for a cryptocurrency.
