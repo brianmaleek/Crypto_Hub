@@ -2,7 +2,8 @@ import os
 import telebot
 import logging
 from dotenv import load_dotenv
-
+from api.api import get_price
+import asyncio
 
 # Load the environment variables from the .env file
 load_dotenv()
@@ -47,26 +48,36 @@ def send_crypto(message):
     top_button = telebot.types.InlineKeyboardButton('Top 10 Cryptocurrencies', callback_data='top')
     
     # Create a menu item for /price with an inline keyboard
-    price_button = telebot.types.InlineKeyboardButton('Price of a Cryptocurrency', callback_data='price')
+    # price_button = telebot.types.InlineKeyboardButton('Price of a Cryptocurrency', callback_data='price')
     
     # Create a menu item for /history with an inline keyboard
     history_button = telebot.types.InlineKeyboardButton('Historical Data of a Cryptocurrency', callback_data='history')
     
     # Add the menu items to the main markup
-    markup.add(top_button, price_button, history_button)
+    markup.add(top_button, history_button)
     
     # Send the message with the menu items
     bot.reply_to(message, "Choose an option:", reply_markup=markup)
 
+# Handle Price Query
+@bot.message_handler(commands=['price'])
+def send_price(message):
+    code = bot.reply_to(message, "You clicked on /price. Please enter the name of the cryptocurrency you want to know the price of.")
+    
+    # Handle the message with the crypto name
+    @bot.message_handler(func=lambda message: True)
+    def handle_crypto_name(message):
+        crypto_name = message.text
+        asyncio.run(process_crypto_price_step(message.chat.id, crypto_name))
 
-""" def get_crypto_price(crypto):
+# api consumption
+async def process_crypto_price_step(chat_id, crypto_name):
     try:
-        r = requests.get(f'https://api.coinbase.com/v2/prices/{crypto}-USD/spot')
-        price = r.json()['data']['amount']
-        return price
+        price = await(get_price(crypto_name))
+        bot.send_message(chat_id, f"The price of {crypto_name} is {price} USD")
     except Exception as e:
-        logging.error(f"Error getting price: {str(e)}")
-        return None """
+        await bot.reply_to(chat_id, 'Ooops! Something went wrong. Please try again.')
+
 
 
 
@@ -108,9 +119,7 @@ def callback_query(call):
         elif call.data == 'top':
             bot.send_message(call.message.chat.id, "You clicked on /top. Here's information about the top 10 cryptocurrencies.")
             # Add your logic to fetch and display information about the top 10 cryptocurrencies.
-        elif call.data == 'price':
-            bot.send_message(call.message.chat.id, "You clicked on /price. Here's information about the price of a specific cryptocurrency.")
-            # Add your logic to fetch and display information about cryptocurrency prices.
+       
         elif call.data == 'history':
             bot.send_message(call.message.chat.id, "You clicked on /history. Here's information about the historical data of a specific cryptocurrency.")
             # Add your logic to fetch and display historical data for a cryptocurrency.
