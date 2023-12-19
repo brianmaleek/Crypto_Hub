@@ -4,6 +4,7 @@ import logging
 from dotenv import load_dotenv
 from api.api import get_price, get_price_history, get_top
 import asyncio
+import datetime
 
 
 # Load the environment variables from the .env file
@@ -118,16 +119,24 @@ async def process_crypto_price_step(chat_id, crypto_name):
             data = await get_price(crypto_name)
 
             # print debug statement
+            logging.debug(f"Debug: {crypto_name=}, {data=}")
             print(f"Debug: {crypto_name=}, {data=}")
 
             price = data.get(crypto_name, {}).get("usd")
 
             if price is not None:
-                bot.send_message(chat_id, f"The price of {crypto_name} is {price} USD")
+                # get the current timestamp
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                message = (
+                    f"The price of {crypto_name} is {price} USD\n"
+                    f"Last updated: {timestamp}"
+                )
+                bot.send_message(chat_id, message)
             else:
                 bot.send_message(chat_id, f"Could not fetch the price for {crypto_name}")
 
             # print for testing
+            logging.info(f"Testing {crypto_name} - Price {price}")
             print(f"Testing {crypto_name} - Price {price}")
 
     except Exception as e:
