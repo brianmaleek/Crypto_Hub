@@ -131,7 +131,7 @@ async def process_crypto_price_step(chat_id, crypto_name):
                 )
                 bot.send_message(chat_id, message)
             else:
-                bot.send_message(chat_id, f"Could not fetch the price for {crypto_name}")
+                bot.send_message(chat_id, f"Could not fetch the price for {crypto_name}. Please check if {crypto_name} is a valid cryptocurrency and try Again.")
 
             # print for testing
             # logging.info(f"Testing {crypto_name} - Price {price}")
@@ -154,14 +154,22 @@ def send_history(message):
 
 # Handle the message with the crypto name and get date
 def handle_crypto_name(message):
-    crypto_name = message.text
+    crypto_name = message.text.strip().lower()
     bot.send_message(message.chat.id, f"You entered {crypto_name}. Please enter the date in the format DD-MM-YYYY.")
     bot.register_next_step_handler(message, lambda msg: handle_date(msg, crypto_name))
 
 # Handle the message with the date
 def handle_date(message, crypto_name):
     date = message.text
-    asyncio.run(process_crypto_history_step2(message.chat.id, crypto_name, date))
+
+    if not date:
+        bot.send_message(message.chat.id, "Please enter a valid date in the format DD-MM-YYYY.")
+        return
+    elif len(date.split("-")) != 3:
+        bot.send_message(message.chat.id, "Please enter a valid date in the format DD-MM-YYYY.")
+        return
+    else:
+        asyncio.run(process_crypto_history_step2(message.chat.id, crypto_name, date))
 
 
 async def process_crypto_history_step2(chat_id, crypto_name, date):
@@ -177,6 +185,7 @@ async def process_crypto_history_step2(chat_id, crypto_name, date):
         current_price = market_data["current_price"]["usd"]
         market_cap = market_data["market_cap"]["usd"]
         total_volume = market_data["total_volume"]["usd"]
+        date = datetime.datetime.strptime(date, "%d-%m-%Y").strftime("%d %B %Y")
 
         if current_price is not None and market_cap is not None and total_volume is not None:
             message = (
