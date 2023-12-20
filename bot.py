@@ -74,7 +74,6 @@ def get_top_crypto(message):
 async def process_top_crypto_step(message):
     try:
         data = await get_top() 
-        print("Debug: Top 10 Data:", data)  
         if data:
             for i in range(10):
                 name = data[i].get("name")
@@ -118,8 +117,8 @@ async def process_crypto_price_step(chat_id, crypto_name):
             data = await get_price(crypto_name)
 
             # print debug statement
-            logging.debug(f"Debug: {crypto_name=}, {data=}")
-            print(f"Debug: {crypto_name=}, {data=}")
+            # logging.debug(f"Debug: {crypto_name=}, {data=}")
+            # print(f"Debug: {crypto_name=}, {data=}")
 
             price = data.get(crypto_name, {}).get("usd")
 
@@ -135,8 +134,8 @@ async def process_crypto_price_step(chat_id, crypto_name):
                 bot.send_message(chat_id, f"Could not fetch the price for {crypto_name}")
 
             # print for testing
-            logging.info(f"Testing {crypto_name} - Price {price}")
-            print(f"Testing {crypto_name} - Price {price}")
+            # logging.info(f"Testing {crypto_name} - Price {price}")
+            # print(f"Testing {crypto_name} - Price {price}")
 
     except Exception as e:
         print(f"An error occurred: {e}")
