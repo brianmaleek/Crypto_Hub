@@ -67,34 +67,33 @@ def send_crypto(message):
 @bot.message_handler(commands=['top'])
 def get_top_crypto(message):
     bot.reply_to(message, "You clicked on /top. Here's information about the top 10 cryptocurrencies.")
+    
+    asyncio.run(process_top_crypto_step(message))
 
-    # Handle the message with the crypto name
-    @bot.message_handler(func=lambda message: True)
-    def handle_crypto_name(message):
-        asyncio.run(process_top_step(message.chat.id))
 
-# api consumption
-async def process_top_step(chat_id):
+async def process_top_crypto_step(message):
     try:
-        data = await get_top()
-        print("Debug: Top 10 Data:", data) # print debug statement
+        data = await get_top() 
+        print("Debug: Top 10 Data:", data)  
         if data:
             for i in range(10):
                 name = data[i].get("name")
                 price = data[i].get("current_price")
                 market_cap = data[i].get("market_cap")
                 total_volume = data[i].get("total_volume")
-                message = (
+                # Construct the message
+                response_message = (
                     f"{i+1}. {name}\n"
                     f"Price: {price} USD\n"
                     f"Market Cap: {market_cap} USD\n"
                     f"Total Volume: {total_volume} USD"
                 )
-                bot.send_message(chat_id, message)
+                bot.send_message(message.chat.id, response_message)  
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        bot.send_message(chat_id, 'Oops! Something went wrong. Please try again.')
+        bot.send_message(message.chat.id, 'Oops! Something went wrong. Please try again.')  
+
 
 
 #####################
