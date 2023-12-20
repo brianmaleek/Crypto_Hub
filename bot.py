@@ -114,7 +114,7 @@ def send_price(message):
 async def process_crypto_price_step(chat_id, crypto_name):
     try:
         for input_crypto_name in crypto_name:
-            crypto_name = input_crypto_name.strip()
+            crypto_name = input_crypto_name.strip().lower()
             data = await get_price(crypto_name)
 
             # print debug statement
